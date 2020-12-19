@@ -1,10 +1,10 @@
 package zkp
 
 import (
-	"encoding/hex"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/hash/mimc"
 	"github.com/consensys/gurvy"
+	"github.com/consensys/gurvy/bn256/fr"
 )
 
 const seed = "testSeed"
@@ -29,8 +29,15 @@ func (hc *HashCircuit) Define(curveID gurvy.ID, cs *frontend.ConstraintSystem) e
 	return nil
 }
 
-func (hc *HashCircuit) Commit(sc []byte) {
-	mimcHash := MiMCBn256(sc)
+func (hc *HashCircuit) Commit(sc []byte) string {
+	var data fr.Element
+	data.SetBytes(sc)
+	mimcHash := MiMCBn256(data.Bytes())
+
+	// private info, won't be disclosed
+	hc.Receiver.Assign(data)
+	// public info, usesless without proof
 	hc.Commitment.Assign(mimcHash)
-	hc.Receiver.Assign(hex.EncodeToString(sc))
+
+	return string(mimcHash)
 }

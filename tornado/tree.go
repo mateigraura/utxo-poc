@@ -69,11 +69,7 @@ func (t *Tree) MakeTree() string {
 
 func (t *Tree) HasValidRoot(nullifier string) bool {
 	if val, ok := t.RootHistory[nullifier]; ok {
-		if val.IsValid {
-			return true
-		} else {
-			return false
-		}
+		return val.IsValid
 	}
 	return false
 }

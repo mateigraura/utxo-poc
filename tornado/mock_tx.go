@@ -35,7 +35,6 @@ func Run() {
 	// satoshi deposits x coins for bob
 	satoshiWallet.MixerDeposit("bob", client, mixer)
 
-	// bob address has fake commitments, constraint won't be satisfied
-	// satoshi and bob are not friends anymore
+	// bob withdraws x coins received from satoshi
 	bobWallet.MixerWithdraw(client, mixer)
 }
