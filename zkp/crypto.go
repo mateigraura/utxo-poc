@@ -14,10 +14,9 @@ func MiMCBn256Decoded(sc string) string {
 }
 
 func MiMCBn256(sc []byte) []byte {
-	var data, tmp fr.Element
+	var data fr.Element
 	data.SetBytes(sc)
 	dataBytes := data.Bytes()
 	b := bn256.Sum(seed, dataBytes[:])
-	tmp.SetBytes(b)
-	return tmp.Bytes()
+	return b
 }

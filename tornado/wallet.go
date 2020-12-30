@@ -7,12 +7,12 @@ import (
 )
 
 type Wallet struct {
-	Owner string
-	Cts   map[string]zkp.CircuitMock
+	Owner     string
+	Addresses map[string]string
 }
 
 func (w *Wallet) NewWallet(owner string) {
-	w.Cts = mock.Commitments()
+	w.Addresses = mock.Commitments()
 	w.Owner = owner
 }
 
@@ -22,15 +22,11 @@ func (w *Wallet) MixerDeposit(receiverAddress string, client Client, ScAddress M
 	fmt.Printf("Receiver address: %s\n", receiverAddress)
 
 	var txPayload zkp.HashCircuit
-	receiver := w.Cts[receiverAddress]
-
-	// private info, won't be disclosed
-	txPayload.Receiver.Assign(receiver.ReceiverEncoded)
-	// public info, usesless without proof
-	txPayload.Commitment.Assign(receiver.Commitment)
+	receiver := w.Addresses[receiverAddress]
+	commitment := txPayload.Commit([]byte(receiver))
 
 	// we assume the Mixer is a smart contract at some ScAddress
-	client.SendFunds(txPayload, receiver.Commitment, ScAddress)
+	client.SendFunds(txPayload, commitment, ScAddress)
 }
 
 // this would be a web3 contract instance. the wallet would only sign the tx
@@ -38,12 +34,8 @@ func (w *Wallet) MixerWithdraw(client Client, ScAddress Mixer) {
 	fmt.Printf("Initiating claim TX for x coins for owner: %s\n", w.Owner)
 
 	var txPayload zkp.HashCircuit
-	walletAddress := w.Cts[w.Owner]
+	walletAddress := w.Addresses[w.Owner]
+	commitment := txPayload.Commit([]byte(walletAddress))
 
-	// private info, won't be disclosed
-	txPayload.Receiver.Assign(walletAddress.ReceiverEncoded)
-	// public info, usesless without proof
-	txPayload.Commitment.Assign(walletAddress.Commitment)
-
-	client.Withdraw(txPayload, walletAddress.Commitment, ScAddress)
+	client.Withdraw(txPayload, commitment, ScAddress)
 }
